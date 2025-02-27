@@ -1,4 +1,5 @@
 import { Outlet, NavLink, Link } from 'react-router';
+import Toast from '../components/Toast';
 
 const routes = [
   { path: '/', name: '首頁' },
@@ -12,9 +13,7 @@ export default function FrontLayout() {
       <header>
         <nav className="navbar navbar-expand-md bg-body-tertiary">
           <div className="container-fluid">
-            <div className="navbar-brand">
-              CakeShopping
-            </div>
+            <div className="navbar-brand">CakeShopping</div>
             <button
               className="navbar-toggler"
               type="button"
@@ -52,6 +51,7 @@ export default function FrontLayout() {
       </header>
       <main>
         <Outlet></Outlet>
+        <Toast />
       </main>
       <footer></footer>
     </>

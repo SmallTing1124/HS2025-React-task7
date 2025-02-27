@@ -6,8 +6,11 @@ const BASE_URL = import.meta.env.VITE_BASE_URL;
 const API_PATH = import.meta.env.VITE_API_PATH;
 
 import { Link, useParams } from 'react-router';
+import { useDispatch } from 'react-redux';
+import { pushMessage } from '../../redux/toastSlice';
 
 export default function ProductDetail() {
+  const dispatch = useDispatch()
   const [isScreenLoading, setIsScreenLoading] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const params = useParams();
@@ -35,17 +38,28 @@ export default function ProductDetail() {
   const handleAddToCart = async (product_id, qtySelect) => {
     setIsLoading(true);
     try {
-      await axios.post(`${BASE_URL}/api/${API_PATH}/cart`, {
+      const res = await axios.post(`${BASE_URL}/api/${API_PATH}/cart`, {
         data: {
           product_id,
           qty: Number(qtySelect),
         },
       });
-      alert(`已加入購物車`);
+      const { message } = res.data;
+      dispatch(
+        pushMessage({
+          text: message,
+          status: 'success',
+        })
+      );
       setQtySelect(1);
     } catch (error) {
       console.error(error); // 紀錄完整錯誤訊息
-      alert(`加入購物車失敗`);
+      dispatch(
+        pushMessage({
+          text: '加入購物車失敗',
+          status: 'failed',
+        })
+      );
     } finally {
       setIsLoading(false);
     }

@@ -4,6 +4,8 @@ import axios from 'axios';
 
 import { useEffect, useRef } from 'react';
 import { Modal } from 'bootstrap';
+import { useDispatch } from 'react-redux';
+import { pushMessage } from '../../../redux/toastSlice';
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 const API_PATH = import.meta.env.VITE_API_PATH;
@@ -16,6 +18,7 @@ function ProductModal({
   isOpen,
   setIsOpen,
 }) {
+  const dispatch = useDispatch();
   //產品詳情頁：綁定DOM
   const productModalRef = useRef(null);
 
@@ -118,20 +121,27 @@ function ProductModal({
           is_enabled: tempProduct.is_enabled ? 1 : 0,
         },
       });
+      dispatch(
+        pushMessage({
+          text: `新增商品成功`,
+          status: 'success',
+        })
+      );
       getProducts();
       handleCloseProductModal();
     } catch (error) {
-      if (error.response && error.response.data) {
-        alert(`新增商品失敗：${error.response.data.message}`);
-      } else {
-        console.log(error);
-      }
+      const { message } = error.response.data;
+      dispatch(
+        pushMessage({
+          text: message,
+          status: 'failed',
+        })
+      );
     }
   };
   // 更新商品：取API
   const updateProduct = async () => {
     try {
-      
       await axios.put(
         `${BASE_URL}/api/${API_PATH}/admin/product/${tempProduct.id}`,
         {
@@ -143,10 +153,22 @@ function ProductModal({
           },
         }
       );
+      dispatch(
+        pushMessage({
+          text: `更新商品成功`,
+          status: 'success',
+        })
+      );
       getProducts();
       handleCloseProductModal();
     } catch (error) {
-      alert(`修改商品失敗:${error.response.data.message}`);
+      const { message } = error.response.data;
+      dispatch(
+        pushMessage({
+          text: `更新商品失敗：${message}`,
+          status: 'failed',
+        })
+      );
     }
   };
 
@@ -213,7 +235,7 @@ function ProductModal({
 
                     <div className="border rounded text-center bg-dark mt-2 overflow-hidden">
                       <img
-                        src={tempProduct.imageUrl || "default-image.jpg"}
+                        src={tempProduct.imageUrl || 'default-image.jpg'}
                         alt={tempProduct?.title}
                         className="object-fit-contain "
                         height="150"
@@ -306,7 +328,7 @@ function ProductModal({
                       placeholder="請輸入分類"
                     />
                   </div>
-                  
+
                   <div className="mb-3">
                     <label htmlFor="unit" className="form-label">
                       單位

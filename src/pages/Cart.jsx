@@ -3,11 +3,14 @@ import { Modal } from 'bootstrap';
 import axios from 'axios';
 import { Link } from 'react-router';
 import ScreenLoading from '../components/ScreenLoading';
+import { useDispatch } from 'react-redux';
+import { pushMessage } from '../redux/toastSlice';
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 const API_PATH = import.meta.env.VITE_API_PATH;
 
 export default function Cart() {
+  const dispatch = useDispatch();
   const [isScreenLoading, setIsScreenLoading] = useState(false);
   const [cartData, setCartData] = useState({});
   // 取得購物車
@@ -19,7 +22,7 @@ export default function Cart() {
     } catch (error) {
       console.log(error);
       alert(`取得購物清單失敗`);
-    }finally{
+    } finally {
       setIsScreenLoading(false);
     }
   };
@@ -48,20 +51,46 @@ export default function Cart() {
     try {
       await axios.delete(`${BASE_URL}/api/${API_PATH}/carts`);
       closeClearCartModal();
+      dispatch(
+        pushMessage({
+          text: `購物車已清除`,
+          status: 'success',
+        })
+      );
       getCart();
     } catch (error) {
-      console.log(error);
-      alert(`清除購物車失敗！`);
+      const { message } = error.response.data;
+      closeClearCartModal();
+      dispatch(
+        pushMessage({
+          text: message,
+          status: 'failed',
+        })
+      );
     }
   };
 
   const handleRemoveItemCart = async (cart_id) => {
     try {
-      await axios.delete(`${BASE_URL}/api/${API_PATH}/cart/${cart_id}`);
+      const res = await axios.delete(
+        `${BASE_URL}/api/${API_PATH}/cart/${cart_id}`
+      );
+      const { message } = res.data;
+      dispatch(
+        pushMessage({
+          text: message,
+          status: 'success',
+        })
+      );
       getCart();
     } catch (error) {
-      console.log(error.response.data.message);
-      alert(`刪除商品失敗`);
+      const { message } = error.response.data;
+      dispatch(
+        pushMessage({
+          text: message,
+          status: 'failed',
+        })
+      );
     }
   };
 

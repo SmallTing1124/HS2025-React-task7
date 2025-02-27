@@ -4,5 +4,6 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: "/你的Repo名稱/",
+  base: "/HS2025-React-task7/",
+  // base: "/",
 })

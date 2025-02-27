@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { Outlet, NavLink, Link, useNavigate } from 'react-router';
+import Toast from '../components/Toast';
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
 const routes = [
@@ -15,6 +16,7 @@ export default function AdminLayout() {
       navigate('/');
     } catch (error) {
       console.log(error);
+      alert(`登出失敗`);
     }
   };
   return (
@@ -65,6 +67,7 @@ export default function AdminLayout() {
       </header>
       <main>
         <Outlet></Outlet>
+        <Toast />
       </main>
       <footer></footer>
     </>

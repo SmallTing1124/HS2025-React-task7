@@ -7,6 +7,8 @@ import ProductModal from '../admin/components/ProductModal';
 import DelProductModal from '../admin/components/DelProductModal';
 import { useNavigate } from 'react-router';
 import ScreenLoading from '../../components/ScreenLoading';
+import { useDispatch } from 'react-redux';
+import { pushMessage } from '../../redux/toastSlice';
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 const API_PATH = import.meta.env.VITE_API_PATH;
@@ -26,7 +28,7 @@ const defaultModalState = {
 };
 
 export default function Products() {
-  const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useDispatch();
   const [isScreenLoading, setIsScreenLoading] = useState(false);
 
   const navigate = useNavigate();
@@ -51,7 +53,7 @@ export default function Products() {
       } catch (error) {
         alert(error.response.data.message);
         navigate('/login');
-      }finally{
+      } finally {
         setIsScreenLoading(false);
       }
     })();
@@ -63,12 +65,18 @@ export default function Products() {
       const productsRes = await axios.get(
         `${BASE_URL}/api/${API_PATH}/admin/products?page=${page}`
       );
-      setProducts(productsRes.data.products);
-      setPageInfo(productsRes.data.pagination);
+      const { products, pagination } = productsRes.data;
+      setProducts(products);
+      setPageInfo(pagination);
     } catch (error) {
-      console.log(error);
-      alert('取得產品失敗');
-    }finally{
+      const { message } = error.response.data;
+      dispatch(
+        pushMessage({
+          text: message,
+          status: 'failed',
+        })
+      );
+    } finally {
       setIsScreenLoading(false);
     }
   };
@@ -89,7 +97,6 @@ export default function Products() {
       case 'edit':
         setTempProduct(product);
         break;
-
       default:
         break;
     }
@@ -104,8 +111,20 @@ export default function Products() {
       await axios.delete(
         `${BASE_URL}/api/${API_PATH}/admin/product/${tempProduct.id}`
       );
+      dispatch(
+        pushMessage({
+          text: `已刪除商品`,
+          status: 'success',
+        })
+      );
     } catch (error) {
-      alert(`修改商品失敗：${error.response.data.message}`);
+      const { message } = error.response.data;
+      dispatch(
+        pushMessage({
+          text: message,
+          status: 'failed',
+        })
+      );
     }
   };
   return (

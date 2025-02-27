@@ -3,10 +3,14 @@ import { Link } from 'react-router';
 import ScreenLoading from '../../components/ScreenLoading';
 
 import axios from 'axios';
+import { useDispatch } from 'react-redux';
+import { pushMessage } from '../../redux/toastSlice';
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 const API_PATH = import.meta.env.VITE_API_PATH;
 
 function ProductList() {
+  const dispatch = useDispatch();
+
   const [isScreenLoading, setIsScreenLoading] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [products, setProducts] = useState([]);
@@ -23,7 +27,7 @@ function ProductList() {
       } catch (error) {
         alert(`取得商品失敗`);
         console.dir(error.response.data.message);
-      }finally{
+      } finally {
         setIsScreenLoading(false);
       }
     };
@@ -33,15 +37,27 @@ function ProductList() {
   const handleAddToCart = async (product_id, qty) => {
     setIsLoading(true);
     try {
-      await axios.post(`${BASE_URL}/api/${API_PATH}/cart`, {
+      const res = await axios.post(`${BASE_URL}/api/${API_PATH}/cart`, {
         data: {
           product_id,
           qty: Number(qty),
         },
       });
+      const { message } = res.data;
+      dispatch(
+        pushMessage({
+          text: message,
+          status: 'success',
+        })
+      );
     } catch (error) {
-      console.error(error); // 紀錄完整錯誤訊息
-      alert(`加入購物車失敗`);
+      const { message } = error.response.data;
+      dispatch(
+        pushMessage({
+          text: message,
+          status: 'failed',
+        })
+      );
     } finally {
       setIsLoading(false);
     }
